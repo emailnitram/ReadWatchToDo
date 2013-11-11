@@ -1,0 +1,30 @@
+body {
+  padding-top: 20px;
+}
+
+.todo {
+  border: 1px black solid;
+  position: relative;
+  width: 50%;
+  margin: 0 auto;
+}
+
+.title {
+  padding-left: 5px;
+  vertical-align: middle;
+  clear: both;
+}
+
+#close {
+  float: right;
+  right: 20px;
+}
+
+#close:hover {
+  font-size: 25px;
+  color: red;
+}
+
+.todo-input {
+  width: 100%;
+}
