@@ -28,3 +28,11 @@ body {
 .todo-input {
   width: 100%;
 }
+
+.pageImg {
+  max-width: 200px;
+}
+
+iframe {
+  padding: 20px;
+}

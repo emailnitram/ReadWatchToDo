@@ -17,7 +17,13 @@ var todoView = Backbone.View.extend({
       <input type="checkbox">\
       <div class="topcoat-checkbox__checkmark"></div></label>\
       <span id="close">&#10005;</span>\
-      <span class="title"><%= title %></span><iframe width="560" height="315" src="http://www.youtube.com/embed/<%= task %>" frameborder="0" allowfullscreen></iframe>\
+      <span class="title"><%= title %></span><br><iframe width="560" height="315" src="http://www.youtube.com/embed/<%= task %>" frameborder="0" allowfullscreen></iframe>\
+    </li>'),
+  pictureTemplate: _.template('<li class="topcoat-list__item"><label class="topcoat-checkbox">\
+      <input type="checkbox">\
+      <div class="topcoat-checkbox__checkmark"></div></label>\
+      <span id="close">&#10005;</span>\
+      <span class="title"><%= title %></span><br><img class="pageImg" src="<%= image %>">\
     </li>'),
   render: function(userInput,media){
     var item;
@@ -29,10 +35,20 @@ var todoView = Backbone.View.extend({
         $('.topcoat-list__container').append(item);
       });
     } else if(media) {
-      this.getPageInfo(userInput).done(function(data){
-        //console.log(data.results[0]);
-        //var dom = $(data);
-        //var title = dom.find("title").text();
+      var that = this;
+      this.getPageInfo(userInput).done(function( msg ) {
+        var title = msg.match(/<title>(.+)<\/title>/)[1];
+        var openGraphImage = msg.match(/<meta property="og:image" content="(.+)"/)
+        var firstImage = msg.match(/src="(.+(jpg|png|gif))"/);
+        var image;
+        if(openGraphImage && openGraphImage[1]){
+          image = openGraphImage[1];
+        } else {
+          image = firstImage;
+        }
+        console.log(openGraphImage);
+        console.log(firstImage);
+        $('.topcoat-list__container').append(that.pictureTemplate({title: title, image: image}));
       });
     } else {
       item = this.textTemplate({task:userInput});
@@ -50,29 +66,11 @@ var todoView = Backbone.View.extend({
     })
   },
   getPageInfo: function(url){
-    //url = url + 
     return $.ajax({
-    type: 'GET',
-    // headers: {'Access-Control-Allow-Origin': '*'},
-    url: url,
-    contentType: "text",
-    dataType: 'html',
-    success: function(data){
-      console.log(data);
-    }
-    //beforeSend: function(xhr){xhr.setRequestHeader('Access-Control-Allow-Origin', '*');}
-  // 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-  // 'Access-Control-Allow-Headers': 'Authorization'}
-    });
-  },
-  XgetPageInfo: function(url){
-    var page = require('webpage').create();
-    page.open(url, function (status) {
-        var title = page.evaluate(function () {
-            return document.title;
-        });
-        console.log('Page title is ' + title);
-    });
+      url: '/getPageInfo',
+      method: 'POST',
+      data: { url: url }
+    })
   },
   addTask: function(e){
     if(e.which === 13){
