@@ -56,7 +56,7 @@ var todoView = Backbone.View.extend({
     // headers: {'Access-Control-Allow-Origin': '*'},
     url: url,
     contentType: "text",
-    dataType: 'jsonp',
+    dataType: 'html',
     success: function(data){
       console.log(data);
     }
