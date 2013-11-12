@@ -38,24 +38,7 @@ var todoView = Backbone.View.extend({
       });
     } else if(media) {
       var that = this;
-      this.getPageInfo(userInput).done(function( msg ) {
-        console.log(msg.length)
-        var title = msg.match(/<title>(.+)<\/title>/)[1];
-        var openGraphImage = msg.match(/<meta property="og:image" content="(.+)"/);
-        var firstImage = msg.match(/src=['|"](.+(jpg|png|gif))['|"]/);
-        var image;
-        if(openGraphImage && openGraphImage[1]){
-          image = openGraphImage[1];
-        } else {
-          if(Array.isArray(firstImage)){
-            image = firstImage[1];
-          } else {
-            image = firstImage;
-          }
-        }
-        console.log(image);
-        $('.topcoat-list__container').append(that.pictureTemplate({title: title, image: image}));
-      });
+      this.getPageInfo(userInput,that)//.complete();
     } else {
       item = this.textTemplate({task:userInput});
       $('.topcoat-list__container').append(item);
@@ -71,11 +54,31 @@ var todoView = Backbone.View.extend({
       dataType: 'json'
     })
   },
-  getPageInfo: function(url){
-    return $.ajax({
+  getPageInfo: function(url,that){
+    $.ajax({
       url: '/getPageInfo',
       method: 'POST',
-      data: { url: url }
+      data: { url: url },
+      complete: function( msg ) {
+        msg = msg.responseText;
+        var title = msg.match(/<title>(.+)<\/title>/)[1];
+        var openGraphImage = msg.match(/<meta property="og:image" content="(.+)"/);
+        var firstImage = msg.match(/src=['|"](.+(jpg|png|gif))['|"]/);
+        var image;
+        if(openGraphImage && openGraphImage[1]){
+          image = openGraphImage[1];
+        } else {
+          if(Array.isArray(firstImage)){
+            image = firstImage[1];
+          } else {
+            image = firstImage;
+          }
+        }
+        if(image.slice(0,4) !== 'http'){
+          image = url + image;
+        }
+        $('.topcoat-list__container').append(that.pictureTemplate({title: title, image: image}));
+      }
     })
   },
   addTask: function(e){

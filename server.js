@@ -11,16 +11,24 @@ app.configure(function(){
 app.post('/getPageInfo', function(req, res){
   if(req.body.url[4] === 's'){
     https.get(req.body.url, function(response) {
+    var body = '';
     response.on('data', function (chunk) {
-      res.send(chunk);
+      body += chunk;
+    });
+    response.on('end', function () {
+      res.send(body);
     });
     }).on('error', function(e) {
       console.log("Got error: " + e.message);
     });
   } else {
     http.get(req.body.url, function(response) {
+      var body = '';
       response.on('data', function (chunk) {
-        res.send(chunk);
+        body += chunk;
+      });
+      response.on('end', function () {
+        res.send(body);
       });
     }).on('error', function(e) {
       console.log("Got error: " + e.message);
