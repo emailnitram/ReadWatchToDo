@@ -63,7 +63,8 @@ var todoView = Backbone.View.extend({
         msg = msg.responseText;
         var title = msg.match(/<title>(.+)<\/title>/)[1];
         var openGraphImage = msg.match(/<meta property="og:image" content="(.+)"/);
-        var firstImage = msg.match(/src=['|"](.+(jpg|png|gif))['|"]/);
+        //var firstImage = msg.match(/src=['|"](.+(jpg|png|gif))['|"]/);
+        var firstImage = msg.match(/<img[\w "'\/=\.]*src=["|'](\S+)["|'][\w "'\/=\.]*>/);
         var image;
         if(openGraphImage && openGraphImage[1]){
           image = openGraphImage[1];
