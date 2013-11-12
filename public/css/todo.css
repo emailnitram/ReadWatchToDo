@@ -16,6 +16,7 @@ body {
 }
 
 #close {
+  font-size: 25px;
   float: right;
   right: 20px;
 }
@@ -27,6 +28,10 @@ body {
 
 .todo-input {
   width: 100%;
+}
+
+.strikeout {
+  text-decoration: line-through;
 }
 
 .pageImg {

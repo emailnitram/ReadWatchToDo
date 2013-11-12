@@ -2,7 +2,9 @@ var todoView = Backbone.View.extend({
   el: '.todo',
   events: {
     'keypress input' : 'addTask',
-    'click #close' : 'deleteItem'
+    'click #close' : 'deleteItem',
+    'click input[type=checkbox]' : 'toggleComplete',
+    'click #clear-completed' : 'clearCompleted'
   },
   initialize: function(){
     this.collection = new Tasks();
@@ -37,17 +39,21 @@ var todoView = Backbone.View.extend({
     } else if(media) {
       var that = this;
       this.getPageInfo(userInput).done(function( msg ) {
+        console.log(msg.length)
         var title = msg.match(/<title>(.+)<\/title>/)[1];
-        var openGraphImage = msg.match(/<meta property="og:image" content="(.+)"/)
-        var firstImage = msg.match(/src="(.+(jpg|png|gif))"/);
+        var openGraphImage = msg.match(/<meta property="og:image" content="(.+)"/);
+        var firstImage = msg.match(/src=['|"](.+(jpg|png|gif))['|"]/);
         var image;
         if(openGraphImage && openGraphImage[1]){
           image = openGraphImage[1];
         } else {
-          image = firstImage;
+          if(Array.isArray(firstImage)){
+            image = firstImage[1];
+          } else {
+            image = firstImage;
+          }
         }
-        console.log(openGraphImage);
-        console.log(firstImage);
+        console.log(image);
         $('.topcoat-list__container').append(that.pictureTemplate({title: title, image: image}));
       });
     } else {
@@ -88,8 +94,7 @@ var todoView = Backbone.View.extend({
       link = true;
     };
     var task = new Task({title:title,link:link});
-    this.collection.add(task);
-    console.log(this.collection);
+    this.collection.add(task);  
     return link;
   },
   deleteItem: function(e){
@@ -98,7 +103,29 @@ var todoView = Backbone.View.extend({
     var item = this.collection.where({title:userInput})
     this.collection.remove(item);
     $(e.currentTarget).closest('li').remove();
-    console.log(this.collection);
+  },
+  toggleComplete: function(e){
+    $(e.currentTarget).closest('li').find('.title').toggleClass('strikeout');
+    var userInput = $(e.currentTarget).closest('li').find('.title').text();
+    var item = this.collection.where({title:userInput});
+    item[0].attributes.completed = !item[0].attributes.completed;
+  },
+  clearCompleted: function(){
+    this.removeFromCollection();
+    this.removeFromDom();
+  },
+  removeFromCollection: function(){
+    var item = this.collection.where({completed:true});
+    item.forEach(function(listItem){
+      listItem.destroy();
+    });
+  },
+  removeFromDom: function(){
+    $('li').each(function(i,elem){
+      if($(elem).find('input[type=checkbox]').prop("checked")){
+        $(elem).remove();
+      }
+    });
   }
 });
 
@@ -110,24 +137,9 @@ var Task = Backbone.Model.extend({
   }
 });
 
-
 var Tasks = Backbone.Collection.extend({
-  model:Task,
-  initialize: function(){
-    this.fetchLocalStorage();
-    this.on('add remove',this.updateLocalStorage,this);
-  },
-  fetchLocalStorage: function(){
-    //console.log('first fetch');
-  },
-  updateLocalStorage: function(){
-    //console.log('update',this.attributes);
-  }
+  model:Task
 });
-
-var tasksStorage = { 'list': [] };
-localStorage.setItem('tasks',JSON.stringify(tasksStorage));
-var tasks = JSON.parse(localStorage.getItem('tasks'));
 
 $(document).ready(function(){
   new todoView();
